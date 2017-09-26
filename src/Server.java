@@ -8,23 +8,6 @@ import java.net.*;
  */
 public class Server {
 
-    public static ServerSocket getTCPSocket() throws Exception {
-        ServerSocket tcpSocket = null;
-        // Start with port number 1024 and look for a free socket
-        int tcpPort = 1024;
-        while(tcpPort <= 65535) {
-            try {
-                tcpSocket = new ServerSocket(tcpPort);
-                break;
-            }
-            catch (IOException e) {
-                tcpPort++;
-            }
-        }
-        if(tcpSocket == null) throw new Exception("No free port number found");
-        return tcpSocket;
-    }
-
     public static void serverUDP(String reqCodeServer) {
 
         DatagramSocket udpSocket = null;
@@ -44,7 +27,7 @@ public class Server {
                     continue;
                 }
                 // Find a free port to establish TCP connection
-                ServerSocket tcpSocket = getTCPSocket();
+                ServerSocket tcpSocket = new ServerSocket(0);
                 String rPort = String.valueOf(tcpSocket.getLocalPort());
                 System.out.println("SERVER_TCP_PORT=" + rPort);
                 // Send the TCP port to the client
@@ -142,7 +125,13 @@ public class Server {
             System.out.println("Incorrect number of parameters");
             System.exit(1);
         }
-        serverUDP(args[0]);
+        try {
+            int reqCode = Integer.parseInt(args[0]);
+            serverUDP(String.valueOf(reqCode));
+        }
+        catch (Exception e) {
+            System.out.println("Exception:" + e.getMessage());
+        }
     }
 
 }

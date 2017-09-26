@@ -90,14 +90,17 @@ public class Client {
             System.out.println("Incorrect number of parameters");
             System.exit(1);
         }
-        // Get connection details from the arguments
-        String serverAdd = args[0];
-        String serverPort = args[1];
-        String reqCode = args[2];
-        String msg = args[3];
         try {
+            // Get connection details from the arguments
+            String serverAdd = args[0];
+            Integer serverPort = Integer.parseInt(args[1]);
+            if( serverPort < 0 || serverPort > 65535 ) {
+                throw new Exception("Incorrect port number");
+            }
+            Integer reqCode = Integer.parseInt(args[2]);
+            String msg = args[3];
             // Get the tcp port number from the server
-            String tcpPort = udpClient(serverAdd, serverPort, reqCode);
+            String tcpPort = udpClient(serverAdd, String.valueOf(serverPort), String.valueOf(reqCode));
             if(tcpPort == null) {
                 throw new IOException("Could not establish tcp connection with server");
             }
@@ -106,8 +109,8 @@ public class Client {
             // Print the response
             System.out.println("REVERSE=" + revMsg);
         }
-        catch (IOException e) {
-            System.out.println(e.getMessage());
+        catch (Exception e) {
+            System.out.println("EXCEPTION:" + e.getMessage());
         }
     }
 
