@@ -8,7 +8,7 @@ import java.net.*;
  */
 public class Client {
 
-    public static String udpClient(String serverAdd, String serverPort, String reqCode) {
+    public static String udpClient(InetAddress hostName, int serverPort, String reqCode) {
         DatagramSocket udpSocket = null;
         String tcpPort = null;
         try {
@@ -16,11 +16,8 @@ public class Client {
             udpSocket = new DatagramSocket();
             // Set time out of 30 seconds
             udpSocket.setSoTimeout(30000);
-            // Get host name and port number
-            InetAddress hostName = InetAddress.getByName(serverAdd);
-            int reqServerPort = Integer.valueOf(serverPort);
             // Create a UDP request, send req_code to the server
-            DatagramPacket request = new DatagramPacket(reqCode.getBytes(), reqCode.length(), hostName, reqServerPort);
+            DatagramPacket request = new DatagramPacket(reqCode.getBytes(), reqCode.length(), hostName, serverPort);
             udpSocket.send(request);
             // Initialize buffer to receive response from the Server
             byte[] buffer = new byte[1024];
@@ -31,20 +28,16 @@ public class Client {
             tcpPort = new String(reply.getData(), reply.getOffset(), reply.getLength());
             System.out.println("TCP_PORT=" + tcpPort);
             // Send confirmation to the Server. Confirmation has the post number sent by the server
-            DatagramPacket confirmation = new DatagramPacket(tcpPort.getBytes(), tcpPort.length(), hostName, reqServerPort);
+            DatagramPacket confirmation = new DatagramPacket(tcpPort.getBytes(), tcpPort.length(), hostName, serverPort);
             udpSocket.send(confirmation);
             // Receive acknowledgement from the server
-            DatagramPacket ack = new DatagramPacket(buffer, buffer.length);
-            udpSocket.receive(ack);
-            String acknowledgement = new String(ack.getData(), ack.getOffset(), ack.getLength());
+            udpSocket.receive(reply);
+            String acknowledgement = new String(reply.getData(), reply.getOffset(), reply.getLength());
             System.out.println("ACKNOWLEDGEMENT RECEIVED=" + acknowledgement);
             if(acknowledgement.equals("no")) tcpPort = null;
         }
-        catch (SocketException e) {
-            System.out.println("Socket:" + e.getMessage());
-        }
-        catch (IOException e) {
-            System.out.println("IO:" + e.getMessage());
+        catch (Exception e) {
+            System.out.println("EXCEPTION:" + e.getMessage());
         }
         finally {
             // Close the UDP socket
@@ -56,32 +49,18 @@ public class Client {
         }
     }
 
-    public static String tcpClient(String serverAdd, String serverPort, String msg) throws IOException {
-        Socket tcpSocket = null;
-        String revMsg = null;
-        try {
-            // Create a new socket for TCP connection
-            tcpSocket = new Socket(serverAdd, Integer.parseInt(serverPort));
-            // Initialize input and output streams
-            DataInputStream inputStream = new DataInputStream(tcpSocket.getInputStream());
-            DataOutputStream outputStream = new DataOutputStream(tcpSocket.getOutputStream());
-            // Write the message to the output stream to send it to server
-            outputStream.writeUTF(msg);
-            // Initialize buffer for reading from the input stream
-            revMsg = inputStream.readUTF();
-            // Update revMsg with the response from the Sever
-        }
-        catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-        finally {
-            // Close TCP socket
-            if(tcpSocket != null) {
-                tcpSocket.close();
-            }
-            // return the message received from Server
-            return revMsg;
-        }
+    public static String tcpClient(InetAddress hostName, int serverPort, String msg) throws IOException {
+        // Create a new socket for TCP connection
+        Socket tcpSocket = new Socket(hostName, serverPort);
+        // Initialize input and output streams
+        DataInputStream inputStream = new DataInputStream(tcpSocket.getInputStream());
+        DataOutputStream outputStream = new DataOutputStream(tcpSocket.getOutputStream());
+        // Write the message to the output stream to send it to server
+        outputStream.writeUTF(msg);
+        // Update revMsg with the response from the Sever
+        String revMsg = inputStream.readUTF();
+        tcpSocket.close();
+        return revMsg;
     }
 
     public static void main(String[] args) {
@@ -92,7 +71,7 @@ public class Client {
         }
         try {
             // Get connection details from the arguments
-            String serverAdd = args[0];
+            InetAddress hostName = InetAddress.getByName(args[0]);
             Integer serverPort = Integer.parseInt(args[1]);
             if( serverPort < 0 || serverPort > 65535 ) {
                 throw new Exception("Incorrect port number");
@@ -100,12 +79,12 @@ public class Client {
             Integer reqCode = Integer.parseInt(args[2]);
             String msg = args[3];
             // Get the tcp port number from the server
-            String tcpPort = udpClient(serverAdd, String.valueOf(serverPort), String.valueOf(reqCode));
+            String tcpPort = udpClient(hostName, serverPort, String.valueOf(reqCode));
             if(tcpPort == null) {
                 throw new IOException("Could not establish tcp connection with server");
             }
             // Get the response from the server over tcp connection
-            String revMsg = tcpClient(serverAdd, tcpPort, msg);
+            String revMsg = tcpClient(hostName, Integer.valueOf(tcpPort), msg);
             // Print the response
             System.out.println("REVERSE=" + revMsg);
         }
