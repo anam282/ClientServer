@@ -85,34 +85,26 @@ public class Server {
     }
 
     public static  void  serverTCP(ServerSocket tcpSocket) throws IOException{
-        try {
-            // Wait for client to connect
-            Socket client = tcpSocket.accept();
-            // Open data input/output streams
-            DataInputStream inputStream = new DataInputStream(client.getInputStream());
-            DataOutputStream outputStream = new DataOutputStream(client.getOutputStream());
-            // Get message from client
-            String msg = inputStream.readUTF();
-            System.out.println("SERVER_RCV_MSG=" + msg);
-            // Reverse string
-            String revMsg = reverseString(msg);
-            // Write output to output stream
-            outputStream.writeUTF(revMsg);
-            inputStream.close();
-            outputStream.close();
-            client.close();
-        }
-        catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
-        finally {
-            if(tcpSocket != null) {
-                tcpSocket.close();
-            }
-        }
+        // Wait for client to connect
+        Socket client = tcpSocket.accept();
+        // Open data input/output streams
+        DataInputStream inputStream = new DataInputStream(client.getInputStream());
+        DataOutputStream outputStream = new DataOutputStream(client.getOutputStream());
+        // Get message from client
+        String msg = inputStream.readUTF();
+        System.out.println("SERVER_RCV_MSG=" + msg);
+        // Reverse string
+        String revMsg = reverseString(msg);
+        // Write output to output stream
+        outputStream.writeUTF(revMsg);
+        // Close input output streams
+        inputStream.close();
+        outputStream.close();
+        client.close();
+        tcpSocket.close();
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         // start server
         if(args.length != 1) {
             System.out.println("Incorrect number of parameters");
@@ -126,5 +118,4 @@ public class Server {
             System.out.println("Exception:" + e.getMessage());
         }
     }
-
 }
