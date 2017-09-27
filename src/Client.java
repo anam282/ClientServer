@@ -7,6 +7,15 @@ import java.net.*;
  * Created by a2shadab on 24/09/17.
  */
 public class Client {
+    public static final int MAX_PORT = 65535;
+    public static final int BUFFER_LENGTH = 1024;
+    public static final int TIMEOUT = 30000;
+    public static final String NO = "no";
+    public static final int NAME = 0;
+    public static final int PORT = 1;
+    public static final int REQ_CODE = 2;
+    public static final int MSG = 3;
+    public static final int NUM_PARAMETERS = 4;
 
     /**
      *
@@ -24,12 +33,12 @@ public class Client {
             // Create a UDP socket
             udpSocket = new DatagramSocket();
             // Set time out of 30 seconds
-            udpSocket.setSoTimeout(30000);
+            udpSocket.setSoTimeout(TIMEOUT);
             // Create a UDP request, send req_code to the server
             DatagramPacket request = new DatagramPacket(reqCode.getBytes(), reqCode.length(), hostName, serverPort);
             udpSocket.send(request);
             // Initialize buffer to receive response from the Server
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[BUFFER_LENGTH];
             DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
             // Get the response from server. Server sends the random port for establishing TCP connection
             udpSocket.receive(reply);
@@ -43,7 +52,7 @@ public class Client {
             udpSocket.receive(reply);
             String acknowledgement = new String(reply.getData(), reply.getOffset(), reply.getLength());
             System.out.println("ACKNOWLEDGEMENT RECEIVED=" + acknowledgement);
-            if(acknowledgement.equals("no")) tcpPort = null;
+            if(acknowledgement.equals(NO)) tcpPort = null;
         }
         catch (Exception e) {
             System.out.println("EXCEPTION:" + e.getMessage());
@@ -89,19 +98,19 @@ public class Client {
      */
     public static void main(String[] args) {
         // If there are less than 4 arguments program should exit
-        if(args.length != 4) {
+        if(args.length != NUM_PARAMETERS) {
             System.out.println("Incorrect number of parameters");
             System.exit(1);
         }
         try {
             // Get connection details from the arguments
-            InetAddress hostName = InetAddress.getByName(args[0]);
-            Integer serverPort = Integer.parseInt(args[1]);
-            if( serverPort < 0 || serverPort > 65535 ) {
+            InetAddress hostName = InetAddress.getByName(args[NAME]);
+            Integer serverPort = Integer.parseInt(args[PORT]);
+            if( serverPort < 0 || serverPort > MAX_PORT ) {
                 throw new Exception("Incorrect port number");
             }
-            Integer reqCode = Integer.parseInt(args[2]);
-            String msg = args[3];
+            Integer reqCode = Integer.parseInt(args[REQ_CODE]);
+            String msg = args[MSG];
             // Get the tcp port number from the server
             String tcpPort = udpClient(hostName, serverPort, String.valueOf(reqCode));
             if(tcpPort == null) {

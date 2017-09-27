@@ -15,6 +15,12 @@ public class Server {
      * and if there is a match, sets up a tcp connection for transfer of data. If the req_code does not match it does
      * nothing
      */
+    public static final int BUFFER_LENGTH = 1024;
+    public static final String OK = "ok";
+    public static final String NO = "no";
+    public static final int NUM_PARAMETERS = 1;
+    public static final int REQ_CODE = 0;
+
     public static void serverUDP(String reqCodeServer) {
 
         DatagramSocket udpSocket = null;
@@ -22,7 +28,7 @@ public class Server {
             // Create a UDP connection
             udpSocket = new DatagramSocket();
             System.out.println("SERVER_PORT=" + udpSocket.getLocalPort());
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[BUFFER_LENGTH];
             while(true) {
                 // Server receives request code from the client
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
@@ -48,8 +54,8 @@ public class Server {
                 String tcpPort = new String(request.getData(), request.getOffset(), request.getLength());
                 // Check if the port number received by client matches port number sent by server and send acknowledgement
                 if(tcpPort.equals(rPort)) {
-                    DatagramPacket ackReply = new DatagramPacket("ok".getBytes(),
-                            "ok".length(),
+                    DatagramPacket ackReply = new DatagramPacket(OK.getBytes(),
+                            OK.length(),
                             request.getAddress(),
                             request.getPort());
                     udpSocket.send(ackReply);
@@ -57,8 +63,8 @@ public class Server {
                     serverTCP(tcpSocket);
                 }
                 else {
-                    DatagramPacket ackReply = new DatagramPacket("no".getBytes(),
-                            "no".length(),
+                    DatagramPacket ackReply = new DatagramPacket(NO.getBytes(),
+                            NO.length(),
                             request.getAddress(),
                             request.getPort());
                     udpSocket.send(ackReply);
@@ -67,7 +73,7 @@ public class Server {
             }
         }
         catch (Exception e) {
-            System.out.println("Exception:" + e.getMessage());
+            System.out.println("EXCEPTION:" + e.getMessage());
         }
         finally {
             if(udpSocket!= null) {
@@ -131,16 +137,16 @@ public class Server {
      */
     public static void main(String[] args) {
         // start server
-        if(args.length != 1) {
+        if(args.length != NUM_PARAMETERS) {
             System.out.println("Incorrect number of parameters");
             System.exit(1);
         }
         try {
-            int reqCode = Integer.parseInt(args[0]);
+            int reqCode = Integer.parseInt(args[REQ_CODE]);
             serverUDP(String.valueOf(reqCode));
         }
         catch (Exception e) {
-            System.out.println("Exception:" + e.getMessage());
+            System.out.println("EXCEPTION:" + e.getMessage());
         }
     }
 }
