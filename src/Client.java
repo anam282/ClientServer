@@ -26,45 +26,33 @@ public class Client {
      * Opens a UDP socket and sends req_code to the server. After the server validates the req_code and sends a TCP
      * port number, it send a confirmation and waits for the acknowledgement from the server
      */
-    public static String udpClient(InetAddress hostName, int serverPort, String reqCode) {
-        DatagramSocket udpSocket = null;
-        String tcpPort = null;
-        try {
-            // Create a UDP socket
-            udpSocket = new DatagramSocket();
-            // Set time out of 30 seconds
-            udpSocket.setSoTimeout(TIMEOUT);
-            // Create a UDP request, send req_code to the server
-            DatagramPacket request = new DatagramPacket(reqCode.getBytes(), reqCode.length(), hostName, serverPort);
-            udpSocket.send(request);
-            // Initialize buffer to receive response from the Server
-            byte[] buffer = new byte[BUFFER_LENGTH];
-            DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
-            // Get the response from server. Server sends the random port for establishing TCP connection
-            udpSocket.receive(reply);
-            // Get port from the response
-            tcpPort = new String(reply.getData(), reply.getOffset(), reply.getLength());
-            System.out.println("TCP_PORT=" + tcpPort);
-            // Send confirmation to the Server. Confirmation has the post number sent by the server
-            DatagramPacket confirmation = new DatagramPacket(tcpPort.getBytes(), tcpPort.length(), hostName, serverPort);
-            udpSocket.send(confirmation);
-            // Receive acknowledgement from the server
-            udpSocket.receive(reply);
-            String acknowledgement = new String(reply.getData(), reply.getOffset(), reply.getLength());
-            System.out.println("ACKNOWLEDGEMENT RECEIVED=" + acknowledgement);
-            if(acknowledgement.equals(NO)) tcpPort = null;
-        }
-        catch (Exception e) {
-            System.out.println("EXCEPTION:" + e.getMessage());
-        }
-        finally {
-            // Close the UDP socket
-            if(udpSocket != null) {
-                udpSocket.close();
-            }
-            // Return the TCP Port received from server
-            return tcpPort;
-        }
+    public static String udpClient(InetAddress hostName, int serverPort, String reqCode) throws Exception{
+        // Create a UDP socket
+        DatagramSocket udpSocket = new DatagramSocket();
+        // Set time out of 30 seconds
+        udpSocket.setSoTimeout(TIMEOUT);
+        // Create a UDP request, send req_code to the server
+        DatagramPacket request = new DatagramPacket(reqCode.getBytes(), reqCode.length(), hostName, serverPort);
+        udpSocket.send(request);
+        // Initialize buffer to receive response from the Server
+        byte[] buffer = new byte[BUFFER_LENGTH];
+        DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
+        // Get the response from server. Server sends the random port for establishing TCP connection
+        udpSocket.receive(reply);
+        // Get port from the response
+        String tcpPort = new String(reply.getData(), reply.getOffset(), reply.getLength());
+        System.out.println("TCP_PORT=" + tcpPort);
+        // Send confirmation to the Server. Confirmation has the post number sent by the server
+        DatagramPacket confirmation = new DatagramPacket(tcpPort.getBytes(), tcpPort.length(), hostName, serverPort);
+        udpSocket.send(confirmation);
+        // Receive acknowledgement from the server
+        udpSocket.receive(reply);
+        String acknowledgement = new String(reply.getData(), reply.getOffset(), reply.getLength());
+        System.out.println("ACKNOWLEDGEMENT_RECEIVED=" + acknowledgement);
+        if(acknowledgement.equals(NO)) tcpPort = null;
+        udpSocket.close();
+        // Return the TCP Port received from server
+        return tcpPort;
     }
 
     /**
