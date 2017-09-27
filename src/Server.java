@@ -8,6 +8,13 @@ import java.net.*;
  */
 public class Server {
 
+    /**
+     *
+     * @param reqCodeServer
+     * This function runs the UDP connection. When a client sends a request_code, it matches the code with its req_code
+     * and if there is a match, sets up a tcp connection for transfer of data. If the req_code does not match it does
+     * nothing
+     */
     public static void serverUDP(String reqCodeServer) {
 
         DatagramSocket udpSocket = null;
@@ -69,6 +76,12 @@ public class Server {
         }
     }
 
+    /**
+     *
+     * @param str
+     * @return reversed str
+     * Takes a string as input and returns the reversed string
+     */
     public static String reverseString(String str) {
         if(str == null || str.length() == 0) return str;
         char[] strArr = str.toCharArray();
@@ -84,6 +97,13 @@ public class Server {
         return new String(strArr);
     }
 
+    /**
+     *
+     * @param tcpSocket
+     * @throws IOException
+     * Waits for client to connect over TCP socket. When the connection is established, accepts a string input from the
+     * client and sends back reversed string and closes the connection.
+     */
     public static  void  serverTCP(ServerSocket tcpSocket) throws IOException{
         // Wait for client to connect
         Socket client = tcpSocket.accept();
@@ -104,6 +124,11 @@ public class Server {
         tcpSocket.close();
     }
 
+    /**
+     *
+     * @param args
+     * Runs the server program
+     */
     public static void main(String[] args) {
         // start server
         if(args.length != 1) {

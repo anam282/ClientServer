@@ -8,6 +8,15 @@ import java.net.*;
  */
 public class Client {
 
+    /**
+     *
+     * @param hostName
+     * @param serverPort
+     * @param reqCode
+     * @return tcpPort
+     * Opens a UDP socket and sends req_code to the server. After the server validates the req_code and sends a TCP
+     * port number, it send a confirmation and waits for the acknowledgement from the server
+     */
     public static String udpClient(InetAddress hostName, int serverPort, String reqCode) {
         DatagramSocket udpSocket = null;
         String tcpPort = null;
@@ -49,6 +58,16 @@ public class Client {
         }
     }
 
+    /**
+     *
+     * @param hostName
+     * @param serverPort
+     * @param msg
+     * @return
+     * @throws IOException
+     * Establishes TCP connection with the server and sends a string to the server. Receives reversed string from
+     * the server and closes the connection
+     */
     public static String tcpClient(InetAddress hostName, int serverPort, String msg) throws IOException {
         // Create a new socket for TCP connection
         Socket tcpSocket = new Socket(hostName, serverPort);
@@ -63,6 +82,11 @@ public class Client {
         return revMsg;
     }
 
+    /**
+     *
+     * @param args
+     * Runs the client program
+     */
     public static void main(String[] args) {
         // If there are less than 4 arguments program should exit
         if(args.length != 4) {
