@@ -31,8 +31,7 @@ public class Server {
                 String rPort = String.valueOf(tcpSocket.getLocalPort());
                 System.out.println("SERVER_TCP_PORT=" + rPort);
                 // Send the TCP port to the client
-                buffer = rPort.getBytes();
-                DatagramPacket reply = new DatagramPacket(buffer,
+                DatagramPacket reply = new DatagramPacket(rPort.getBytes(),
                         rPort.length(),
                         request.getAddress(),
                         request.getPort());
@@ -59,12 +58,6 @@ public class Server {
                     System.out.println("TCP port received from client did not match the original port number");
                 }
             }
-        }
-        catch (SocketException e) {
-            System.out.println("Socket:" + e.getMessage());
-        }
-        catch (IOException e) {
-            System.out.println("IO:" + e.getMessage());
         }
         catch (Exception e) {
             System.out.println("Exception:" + e.getMessage());
